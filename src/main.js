@@ -1,11 +1,31 @@
+/* global document, window */
+/*
 window.addEventListener("orientationchange", function() {
 }, false);
 
 window.addEventListener("resize", function() {
 }, false);
-
+*/
 var DOC = document;
 var WIN = window;
+
+function RandomPicker(max, min) {
+  this.min = min || 0;
+  this.max = max;
+  this.elements = [];
+  for (var i = this.min; i < this.max; i++) {
+    this.elements.push(i);
+  }
+}
+RandomPicker.prototype = {
+  pick: function() {
+    return this.elements.splice(this.rand(), 1)[0];
+  },
+
+  rand: function() {
+    return Math.floor(Math.random() * (this.elements.length)) + this.min;
+  }
+};
 
 function HiFiveDOM(rootNode) {
   try {
@@ -18,14 +38,17 @@ function HiFiveDOM(rootNode) {
 
 HiFiveDOM.prototype = {
   preloadImages: function(images) {
-    images.forEach(function(image) {
+    var count = images && images.length;
+    var randomOrderImages = [];
+    var randomPicker = new RandomPicker(count);
+    for (var i = 0; i < count; i++) {
       this.createImage({
         class: 'img',
-        src: image,
+        src: images[randomPicker.pick()],
         width: '25%',
         height: '33%'
       });
-    }.bind(this));
+    }
   },
 
   createImage: function(attrs) {
@@ -47,14 +70,14 @@ function HiFive(lifeTime) {
   this.lifeTime = lifeTime || 120;
   this.timer = null;
   this.imageCount = 12;
-  this.imageIdx = [];
   var imageDB = [];
   for (var i = 0; i < this.imageCount; i++) {
-    this.imageIdx.push(i);
     imageDB.push('./images/' + i + '.png');
   }
   this.dom = new HiFiveDOM();
   this.dom.preloadImages(imageDB);
+
+  this.randomPicker = new RandomPicker(this.imageCount);
 
   this.start();
 };
@@ -64,6 +87,7 @@ HiFive.prototype = {
     this.stop();
     if (this.imageCount) {
       var interval = this.lifeTime / this.imageCount;
+      this.showImage();
       this.timer = setInterval(this.showImage.bind(this), interval * 1000);
     }
   },
@@ -75,26 +99,16 @@ HiFive.prototype = {
   },
 
   showImage: function() {
-    var imageIdx = this.imageIdx;
-    var imageNode;
-    var remainImageCount = imageIdx.length;
-    var src;
-    if (remainImageCount) {
-      var n = this.rand(remainImageCount);
-      this.dom.showImage(imageIdx[n]);
-      imageIdx.splice(n, 1);
+    var idx = this.randomPicker.pick();
+    if (!isNaN(idx)) {
+      this.dom.showImage(idx);
     } else {
       this.stop();
     }
-  },
-
-  rand(max, min) {
-    min = min || 0;
-    return Math.floor(Math.random() * (max - min)) + min;
   }
 }
 
 document.addEventListener("DOMContentLoaded", function(event) {
   // DOM fully loaded and parsed
-  var app = new HiFive(12);
+  var app = new HiFive(120);
 });

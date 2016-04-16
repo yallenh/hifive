@@ -1,0 +1,44 @@
+body {
+  margin: 0;
+}
+
+.frame {
+  position: relative;
+  margin: auto;
+}
+.frame:before {
+  display: block;
+  content: "";
+  padding-bottom: 75%;
+}
+
+@media screen and (orientation: portrait) {
+  .frame {
+    width: 80%;
+  }
+}
+
+@media screen and (orientation: landscape) {
+  .frame {
+    width: 70%;
+  }
+}
+
+.frame > .container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.img {
+  vertical-align: bottom;
+  transition: all 1s ease-in;
+  opacity: 0;
+  transform: rotate(-360deg) scale(0);
+}
+.img.show {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
